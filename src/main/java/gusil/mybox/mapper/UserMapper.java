@@ -3,6 +3,7 @@ package gusil.mybox.mapper;
 import gusil.mybox.domain.User;
 import gusil.mybox.dto.request.CreateUserRequest;
 import gusil.mybox.dto.response.CreateUserResponse;
+import gusil.mybox.dto.response.ReadUserResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,6 +21,16 @@ public class UserMapper {
 
     public CreateUserResponse mapToCreateUserResponse(User user) {
         return CreateUserResponse.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .userPassword(user.getUserPassword())
+                .maxUsage(user.getMaxUsage())
+                .currentUsage(user.getCurrentUsage())
+                .build();
+    }
+
+    public ReadUserResponse mapToReadUserResponse(User user) {
+        return ReadUserResponse.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .userPassword(user.getUserPassword())

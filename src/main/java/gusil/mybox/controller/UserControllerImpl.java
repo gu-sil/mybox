@@ -2,6 +2,7 @@ package gusil.mybox.controller;
 
 import gusil.mybox.dto.request.CreateUserRequest;
 import gusil.mybox.dto.response.CreateUserResponse;
+import gusil.mybox.dto.response.ReadUserResponse;
 import gusil.mybox.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,5 +22,12 @@ public class UserControllerImpl implements UserController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public Mono<CreateUserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         return userService.createUser(request);
+    }
+
+    @Override
+    @GetMapping("/{userId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public Mono<ReadUserResponse> readUser(@PathVariable String userId) {
+        return userService.readUser(userId);
     }
 }

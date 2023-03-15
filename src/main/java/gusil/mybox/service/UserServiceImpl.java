@@ -8,11 +8,13 @@ import gusil.mybox.exception.UserNotFoundException;
 import gusil.mybox.mapper.UserMapper;
 import gusil.mybox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
     private final UserMapper mapper;
@@ -31,5 +33,18 @@ public class UserServiceImpl implements UserService {
                 .flatMap(repository::findById)
                 .switchIfEmpty(Mono.error(new UserNotFoundException(userId)))
                 .map(mapper::mapToReadUserResponse);
+    }
+
+    @Override
+    public Mono<User> addUserCurrentUsage(String userId, Long usage) {
+        return Mono
+                .just(userId)
+                .flatMap(repository::findById)
+                .switchIfEmpty(Mono.error(new UserNotFoundException(userId)))
+                .map(user -> {
+                    user.setCurrentUsage(user.getCurrentUsage() + usage);
+                    return user;
+                })
+                .flatMap(repository::save);
     }
 }

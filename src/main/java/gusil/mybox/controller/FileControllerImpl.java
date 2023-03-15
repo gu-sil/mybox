@@ -1,6 +1,7 @@
 package gusil.mybox.controller;
 
 import gusil.mybox.dto.request.UploadFileRequest;
+import gusil.mybox.dto.response.UploadFileResponse;
 import gusil.mybox.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class FileControllerImpl implements FileController {
 
     @Override
     @PostMapping("directories/{directoriesId}/files")
-    public Mono<Void> uploadFile(
+    public Mono<UploadFileResponse> uploadFile(
             @RequestPart String userId,
             @RequestPart String fileName,
             @PathVariable("directoriesId") String fileParent,
@@ -36,7 +37,6 @@ public class FileControllerImpl implements FileController {
                         .filePart(filePart)
                         .fileSize(fileSize)
                         .build())
-                .flatMap(fileService::uploadFile)
-                .then();
+                .flatMap(fileService::uploadFile);
     }
 }

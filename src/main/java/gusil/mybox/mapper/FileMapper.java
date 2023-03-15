@@ -11,7 +11,7 @@ public class FileMapper {
     public File mapToFile(UploadFileRequest request) {
         return File.builder()
                 .fileName(request.getFileName())
-                .fileOwner(request.getFileParent())
+                .fileParent(request.getFileParent())
                 .fileOwner(request.getUserId())
                 .size(request.getFileSize())
                 .build();

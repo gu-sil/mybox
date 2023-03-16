@@ -2,10 +2,12 @@ package gusil.mybox.service;
 
 import gusil.mybox.dto.request.CreateDirectoryRequest;
 import gusil.mybox.dto.response.CreateDirectoryResponse;
+import gusil.mybox.dto.response.ReadDirectoryItemListResponse;
 import gusil.mybox.exception.DirectoryNotFoundException;
 import gusil.mybox.exception.UserNotFoundException;
 import gusil.mybox.mapper.DirectoryMapper;
 import gusil.mybox.repository.DirectoryRepository;
+import gusil.mybox.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -14,6 +16,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class DirectoryServiceImpl implements DirectoryService {
     private final DirectoryRepository repository;
+    private final FileRepository fileRepository;
     private final UserService userService;
     private final DirectoryMapper mapper;
 
@@ -42,5 +45,30 @@ public class DirectoryServiceImpl implements DirectoryService {
                 .map(mapper::mapToDirectory)
                 .flatMap(repository::save)
                 .map(mapper::mapToCreateDirectoryResponse);
+    }
+
+    @Override
+    public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(String directoryId) {
+        return Mono
+                .just(directoryId)
+                .flatMap(repository::existsById)
+                .map(directoryExists -> {
+                    if (directoryExists) {
+                        return new ReadDirectoryItemListResponse();
+                    } else {
+                        throw new DirectoryNotFoundException(directoryId);
+                    }
+                })
+                .flatMap(response -> repository.findAllByDirectoryParent(directoryId).collectList()
+                        .map(directoryList -> {
+                            directoryList.forEach(directory -> response.getItems().add(mapper.mapToReadDirectoryItemListResponseItem(directory)));
+                            return response;
+                        }))
+                .flatMap(response -> fileRepository.findAllByFileParent(directoryId).collectList()
+                        .map(fileList -> {
+                            fileList.forEach(file -> response.getItems().add(mapper.mapToReadDirectoryItemListResponseItem(file)));
+                            return response;
+                        }))
+                ;
     }
 }

@@ -2,12 +2,10 @@ package gusil.mybox.controller;
 
 import gusil.mybox.dto.request.CreateDirectoryRequest;
 import gusil.mybox.dto.response.CreateDirectoryResponse;
+import gusil.mybox.dto.response.ReadDirectoryItemListResponse;
 import gusil.mybox.service.DirectoryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -22,5 +20,11 @@ public class DirectoryControllerImpl implements DirectoryController {
     @PostMapping
     public Mono<CreateDirectoryResponse> createDirectory(@Valid @RequestBody CreateDirectoryRequest request) {
         return directoryService.createDirectory(request);
+    }
+
+    @Override
+    @GetMapping("/{directoryId}/items")
+    public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(@PathVariable String directoryId) {
+        return directoryService.readDirectoryItemList(directoryId);
     }
 }

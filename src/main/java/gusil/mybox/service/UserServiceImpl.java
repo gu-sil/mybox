@@ -47,4 +47,11 @@ public class UserServiceImpl implements UserService {
                 })
                 .flatMap(repository::save);
     }
+
+    @Override
+    public Mono<Boolean> userExists(String userId) {
+        return Mono
+                .just(userId)
+                .flatMap(repository::existsById);
+    }
 }

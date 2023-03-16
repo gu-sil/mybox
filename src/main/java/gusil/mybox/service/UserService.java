@@ -12,4 +12,6 @@ public interface UserService {
     Mono<ReadUserResponse> readUser(String userId);
 
     Mono<User> addUserCurrentUsage(String userId, Long usage);
+
+    Mono<Boolean> userExists(String directoryOwner);
 }

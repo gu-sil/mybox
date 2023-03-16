@@ -1,5 +1,6 @@
 package gusil.mybox.aop;
 
+import gusil.mybox.exception.DirectoryNotFoundException;
 import gusil.mybox.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,13 @@ import static org.springframework.http.ResponseEntity.notFound;
 @RestControllerAdvice
 public class RestExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
-    ResponseEntity postNotFound(UserNotFoundException ex) {
+    ResponseEntity handleUserNotFound(UserNotFoundException ex) {
+        log.debug("handling exception::" + ex);
+        return notFound().build();
+    }
+
+    @ExceptionHandler(DirectoryNotFoundException.class)
+    ResponseEntity handleDirectoryNotFound(DirectoryNotFoundException ex) {
         log.debug("handling exception::" + ex);
         return notFound().build();
     }

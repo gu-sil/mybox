@@ -29,12 +29,5 @@ jobs:
           password: ${{ secrets.NCP_PROD_SERVER_PASSWORD }}
           port: ${{ secrets.NCP_PROD_SERVER_SSH_PORT }}
           script: |
-            bash /home/scripts/stop.sh
-            sleep 60
-            cd /home/mybox
-            git pull
-            mvn package
-            cd ..
-            nohup java -jar /home/mybox/target/mybox-0.0.1-SNAPSHOT.jar 1> nohup/stdout.txt 2> nohup/stderr.txt &
-
+            bash /home/scripts/start.sh
             

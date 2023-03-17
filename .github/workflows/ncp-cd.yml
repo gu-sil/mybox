@@ -32,5 +32,4 @@ jobs:
             bash /home/scripts/stop.sh
             cd /home/mybox
             git pull
-            mvn package
-            nohup java -jar /home/mybox/target/mybox-0.0.1-SNAPSHOT.jar &
+            

@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.NCP_PROD_SERVER_USER }}
           password: ${{ secrets.NCP_PROD_SERVER_PASSWORD }}
           port: ${{ secrets.NCP_PROD_SERVER_SSH_PORT }}
-          scripts: |
+          script: |
             bash /home/scripts/stop.sh
             sleep 60
             cd /home/mybox

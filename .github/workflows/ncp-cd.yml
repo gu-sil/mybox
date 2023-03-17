@@ -30,7 +30,6 @@ jobs:
           port: ${{ secrets.NCP_PROD_SERVER_SSH_PORT }}
           script: |
             bash /home/scripts/stop.sh
-            sleep 60
             cd /home/mybox
             git pull
             mvn package

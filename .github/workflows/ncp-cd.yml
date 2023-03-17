@@ -32,4 +32,5 @@ jobs:
             bash /home/scripts/stop.sh
             cd /home/mybox
             git pull
+            mvn package
             

@@ -33,4 +33,4 @@ jobs:
             cd /home/mybox
             git pull
             mvn package
-            nohup java -jar ./target/mybox-0.0.1-SNAPSHOT.jar &
+            nohup java -jar /home/mybox/target/mybox-0.0.1-SNAPSHOT.jar &

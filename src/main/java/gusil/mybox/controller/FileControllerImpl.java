@@ -5,6 +5,10 @@ import gusil.mybox.dto.response.UploadFileResponse;
 import gusil.mybox.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -38,5 +42,16 @@ public class FileControllerImpl implements FileController {
                         .fileSize(fileSize)
                         .build())
                 .flatMap(fileService::uploadFile);
+    }
+
+    @Override
+    @GetMapping("/directories/{directoryId}/files/{fileId}")
+    public Mono<ResponseEntity<InputStreamResource>> downloadFile(@PathVariable String directoryId, @PathVariable String fileId) {
+        return fileService.downloadFile(directoryId, fileId)
+                .map(inputStream -> ResponseEntity
+                        .ok()
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"download-file\"")
+                        .body(new InputStreamResource(inputStream)));
     }
 }

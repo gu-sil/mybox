@@ -3,6 +3,7 @@ package gusil.mybox.service;
 import gusil.mybox.dto.request.CreateDirectoryRequest;
 import gusil.mybox.dto.response.CreateDirectoryResponse;
 import gusil.mybox.dto.response.ReadDirectoryItemListResponse;
+import gusil.mybox.exception.DirectoryHasChildException;
 import gusil.mybox.exception.DirectoryNotFoundException;
 import gusil.mybox.exception.UserNotFoundException;
 import gusil.mybox.mapper.DirectoryMapper;
@@ -70,5 +71,41 @@ public class DirectoryServiceImpl implements DirectoryService {
                             return response;
                         }))
                 ;
+    }
+
+    @Override
+    public Mono<Void> deleteDirectory(String directoryId) {
+        return Mono
+                .just(directoryId)
+                .flatMap(repository::existsById)
+                .map(directoryExists -> {
+                    if (directoryExists) {
+                        return directoryId;
+                    }
+                    else {
+                        throw new DirectoryNotFoundException(directoryId);
+                    }
+                })
+                .flatMap(fileRepository::existsByFileParent)
+                .map(fileExist -> {
+                    if (fileExist) {
+                        throw new DirectoryHasChildException(directoryId);
+                    }
+                    else {
+                        return directoryId;
+                    }
+                })
+                .flatMap(repository::existsByDirectoryParent)
+                .map(directoryExists -> {
+                    if (directoryExists) {
+                        throw new DirectoryHasChildException(directoryId);
+                    }
+                    else {
+                        return directoryId;
+                    }
+                })
+                .flatMap(repository::deleteById)
+                .then()
+                .log();
     }
 }

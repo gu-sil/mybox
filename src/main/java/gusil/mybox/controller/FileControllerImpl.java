@@ -54,4 +54,10 @@ public class FileControllerImpl implements FileController {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"download-file\"")
                         .body(new InputStreamResource(inputStream)));
     }
+
+    @Override
+    @DeleteMapping("files/{fileId}")
+    public Mono<Void> deleteFile(@PathVariable String fileId) {
+        return fileService.deleteFile(fileId);
+    }
 }

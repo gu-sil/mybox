@@ -16,4 +16,6 @@ public interface FileController {
     );
 
     Mono<ResponseEntity<InputStreamResource>> downloadFile(String directoryId, String fileId);
+
+    Mono<Void> deleteFile(String fileId);
 }

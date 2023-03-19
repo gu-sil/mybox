@@ -1,8 +1,11 @@
 package gusil.mybox.aop;
 
+import gusil.mybox.exception.DirectoryHasChildException;
 import gusil.mybox.exception.DirectoryNotFoundException;
+import gusil.mybox.exception.FileNotFoundException;
 import gusil.mybox.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,4 +26,16 @@ public class RestExceptionHandler {
         log.debug("handling exception::" + ex);
         return notFound().build();
     }
+    @ExceptionHandler(DirectoryHasChildException.class)
+    ResponseEntity handleDirectoryHasChild(DirectoryHasChildException ex) {
+        log.debug("handling exception::" + ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    ResponseEntity handleFileNotFound(FileNotFoundException ex) {
+        log.debug("handling exception::" + ex);
+        return notFound().build();
+    }
+
 }

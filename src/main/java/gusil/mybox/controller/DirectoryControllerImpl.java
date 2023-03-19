@@ -27,4 +27,10 @@ public class DirectoryControllerImpl implements DirectoryController {
     public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(@PathVariable String directoryId) {
         return directoryService.readDirectoryItemList(directoryId);
     }
+
+    @Override
+    @DeleteMapping("/{directoryId}")
+    public Mono<Void> deleteDirectory(@PathVariable String directoryId) {
+        return directoryService.deleteDirectory(directoryId);
+    }
 }

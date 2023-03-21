@@ -7,8 +7,7 @@ import reactor.core.publisher.Mono;
 
 public interface FileRepository extends ReactiveMongoRepository<File, String> {
     Flux<File> findAllByFileParent(String fileParentId);
-
     Mono<Boolean> existsByFileIdAndFileParent(String fileId, String fileParent);
-
+    Mono<Boolean> existsByFileNameAndFileParent(String fileName, String fileParent);
     Mono<Boolean> existsByFileParent(String fileParent);
 }

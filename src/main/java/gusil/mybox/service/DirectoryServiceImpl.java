@@ -108,4 +108,9 @@ public class DirectoryServiceImpl implements DirectoryService {
                 .then()
                 .log();
     }
+
+    @Override
+    public Mono<Boolean> directoryExists(String directoryId) {
+        return repository.existsById(directoryId);
+    }
 }

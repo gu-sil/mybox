@@ -26,10 +26,12 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Mono<UploadFileResponse> uploadFile(UploadFileRequest request) {
-        return Mono.just(request)
-                .flatMap(UploadFileRequest::getFilePart)
-                .flatMap(fp -> fp.transferTo(basePath.resolve(request.getFileName())).thenReturn(fp))
-                .flatMap(fp -> createFileEntity(request))
+        return Mono.zip(createFileEntity(request), request.getFilePart())
+                .flatMap(fileAndFilePart ->
+                        fileAndFilePart
+                                .getT2()
+                                .transferTo(basePath.resolve(fileAndFilePart.getT1().getFileId()))
+                                .thenReturn(fileAndFilePart.getT1()))
                 .flatMap(response -> userService
                         .addUserCurrentUsage(response.getFileOwnerId(), response.getFileSize())
                         .thenReturn(response));

@@ -1,9 +1,6 @@
 package gusil.mybox.aop;
 
-import gusil.mybox.exception.DirectoryHasChildException;
-import gusil.mybox.exception.DirectoryNotFoundException;
-import gusil.mybox.exception.FileNotFoundException;
-import gusil.mybox.exception.UserNotFoundException;
+import gusil.mybox.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,4 +35,9 @@ public class RestExceptionHandler {
         return notFound().build();
     }
 
+    @ExceptionHandler(NameDuplicatedException.class)
+    ResponseEntity handleNameDuplicated(NameDuplicatedException ex) {
+        log.debug("handling exception::" + ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
 }

@@ -3,7 +3,9 @@ package gusil.mybox.service;
 import gusil.mybox.dto.request.UploadFileRequest;
 import gusil.mybox.dto.response.UploadFileResponse;
 import gusil.mybox.exception.FileNotFoundException;
+import gusil.mybox.exception.NameDuplicatedException;
 import gusil.mybox.mapper.FileMapper;
+import gusil.mybox.repository.DirectoryRepository;
 import gusil.mybox.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,12 +23,14 @@ import java.nio.file.Paths;
 public class FileServiceImpl implements FileService {
     private final FileMapper mapper;
     private final FileRepository repository;
+    private final DirectoryRepository directoryRepository;
     private final UserService userService;
     private final Path basePath = Paths.get("../mybox-files/");
 
     @Override
     public Mono<UploadFileResponse> uploadFile(UploadFileRequest request) {
-        return Mono.zip(createFileEntity(request), request.getFilePart())
+        return Mono
+                .zip(createFileEntity(request), request.getFilePart())
                 .flatMap(fileAndFilePart ->
                         fileAndFilePart
                                 .getT2()
@@ -79,6 +83,24 @@ public class FileServiceImpl implements FileService {
 
     private Mono<UploadFileResponse> createFileEntity(UploadFileRequest request) {
         return Mono.just(request)
+                .flatMap(req -> repository.existsByFileNameAndFileParent(req.getFileName(), req.getFileParent()))
+                .map(fileExists -> {
+                    if (fileExists) {
+                        throw new NameDuplicatedException(request.getFileName());
+                    }
+                    else {
+                        return request;
+                    }
+                })
+                .flatMap(req -> directoryRepository.existsByDirectoryNameAndDirectoryParent(req.getFileName(), req.getFileParent()))
+                .map(fileExists -> {
+                    if (fileExists) {
+                        throw new NameDuplicatedException(request.getFileName());
+                    }
+                    else {
+                        return request;
+                    }
+                })
                 .map(mapper::mapToFile)
                 .flatMap(repository::save)
                 .map(mapper::mapToUploadFileResponse);

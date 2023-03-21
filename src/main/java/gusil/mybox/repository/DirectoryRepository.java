@@ -9,4 +9,6 @@ public interface DirectoryRepository extends ReactiveMongoRepository<Directory, 
     Flux<Directory> findAllByDirectoryParent(String directoryOwner);
 
     Mono<Boolean> existsByDirectoryParent(String directoryParent);
+
+    Mono<Boolean> existsByDirectoryNameAndDirectoryParent(String directoryName, String directoryParent);
 }

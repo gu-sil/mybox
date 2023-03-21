@@ -2,7 +2,11 @@ package gusil.mybox.controller;
 
 import gusil.mybox.dto.request.UploadFileRequest;
 import gusil.mybox.dto.response.UploadFileResponse;
+import gusil.mybox.exception.DirectoryNotFoundException;
+import gusil.mybox.exception.UserUsageExceedsException;
+import gusil.mybox.service.DirectoryService;
 import gusil.mybox.service.FileService;
+import gusil.mybox.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -19,21 +23,40 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class FileControllerImpl implements FileController {
     private final FileService fileService;
+    private final DirectoryService directoryService;
+    private final UserService userService;
 
     @Override
-    @PostMapping("directories/{directoriesId}/files")
+    @PostMapping("directories/{directoryId}/files")
     public Mono<UploadFileResponse> uploadFile(
             @RequestPart String userId,
             @RequestPart String fileName,
-            @PathVariable("directoriesId") String fileParent,
+            @PathVariable("directoryId") String fileParent,
             @RequestPart Mono<FilePart> filePart,
             @RequestHeader("Content-Length") Long fileSize) {
 
         return filePart
-//                .flatMap(assertUserExists)
-//                .flatMap(assertDirectoryExists)
-//                .flatMap(assertDuplicatedFileName)
-//                .flatMap(assertUserUsageNotExceeds)
+//                .flatMap(assertUserAuthority)
+                .flatMap(fp -> directoryService.directoryExists(fileParent))
+                .map(directoryExists -> {
+                    if (directoryExists) {
+                        return filePart;
+                    }
+                    else {
+                        throw new DirectoryNotFoundException(fileParent);
+                    }
+                })
+                .flatMap(fp -> userService.currentUsageExceeds(userId, fileSize))
+                .map(usageExceeds -> {
+                    if (usageExceeds) {
+                        throw new UserUsageExceedsException(userId);
+                    }
+                    else {
+                        return filePart;
+                    }
+                })
+                .flatMap(fp -> userService.addUserCurrentUsage(userId, fileSize * -1)
+                        .thenReturn(filePart))
                 .map(fp -> UploadFileRequest.builder()
                         .userId(userId)
                         .fileName(fileName)

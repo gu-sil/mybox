@@ -9,4 +9,5 @@ public interface DirectoryService {
     Mono<CreateDirectoryResponse> createDirectory(CreateDirectoryRequest request);
     Mono<ReadDirectoryItemListResponse> readDirectoryItemList(String directoryId);
     Mono<Void> deleteDirectory(String directoryId);
+    Mono<Boolean> directoryExists(String directoryId);
 }

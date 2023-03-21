@@ -18,6 +18,12 @@ public class RestExceptionHandler {
         return notFound().build();
     }
 
+    @ExceptionHandler(UserUsageExceedsException.class)
+    ResponseEntity handleUserNotFound(UserUsageExceedsException ex) {
+        log.debug("handling exception::" + ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
     @ExceptionHandler(DirectoryNotFoundException.class)
     ResponseEntity handleDirectoryNotFound(DirectoryNotFoundException ex) {
         log.debug("handling exception::" + ex);

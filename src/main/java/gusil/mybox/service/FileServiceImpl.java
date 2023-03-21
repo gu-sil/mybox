@@ -31,14 +31,20 @@ public class FileServiceImpl implements FileService {
     public Mono<UploadFileResponse> uploadFile(UploadFileRequest request) {
         return Mono
                 .zip(createFileEntity(request), request.getFilePart())
+                .flatMap(fileAndFilePart -> userService
+                        .addUserCurrentUsage(
+                                fileAndFilePart.getT1().getFileOwnerId(),
+                                fileAndFilePart.getT1().getFileSize())
+                        .thenReturn(fileAndFilePart))
                 .flatMap(fileAndFilePart ->
                         fileAndFilePart
                                 .getT2()
                                 .transferTo(basePath.resolve(fileAndFilePart.getT1().getFileId()))
                                 .thenReturn(fileAndFilePart.getT1()))
-                .flatMap(response -> userService
-                        .addUserCurrentUsage(response.getFileOwnerId(), response.getFileSize())
-                        .thenReturn(response));
+                .publishOn(Schedulers.boundedElastic())
+                .doOnError(ex -> userService
+                        .addUserCurrentUsage(request.getUserId(), request.getFileSize() * -1)
+                        .block());
     }
 
     @Override

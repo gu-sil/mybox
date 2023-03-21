@@ -54,4 +54,12 @@ public class UserServiceImpl implements UserService {
                 .just(userId)
                 .flatMap(repository::existsById);
     }
+
+    @Override
+    public Mono<Boolean> currentUsageExceeds(String userId, Long usageToAdd) {
+        return Mono
+                .just(userId)
+                .flatMap(repository::findById)
+                .map(user -> user.getCurrentUsage() + usageToAdd > user.getMaxUsage());
+    }
 }

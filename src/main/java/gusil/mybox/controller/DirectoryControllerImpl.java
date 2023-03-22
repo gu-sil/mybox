@@ -5,6 +5,7 @@ import gusil.mybox.dto.response.CreateDirectoryResponse;
 import gusil.mybox.dto.response.ReadDirectoryItemListResponse;
 import gusil.mybox.service.DirectoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -18,18 +19,21 @@ public class DirectoryControllerImpl implements DirectoryController {
 
     @Override
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public Mono<CreateDirectoryResponse> createDirectory(@Valid @RequestBody CreateDirectoryRequest request) {
         return directoryService.createDirectory(request);
     }
 
     @Override
     @GetMapping("/{directoryId}/items")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(@PathVariable String directoryId) {
         return directoryService.readDirectoryItemList(directoryId);
     }
 
     @Override
     @DeleteMapping("/{directoryId}")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public Mono<Void> deleteDirectory(@PathVariable String directoryId) {
         return directoryService.deleteDirectory(directoryId);
     }

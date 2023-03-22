@@ -16,4 +16,6 @@ public interface UserService {
     Mono<Boolean> userExists(String directoryOwner);
 
     Mono<Boolean> currentUsageExceeds(String userId, Long usageToAdd);
+
+    Mono<User> findByUsername(String username);
 }

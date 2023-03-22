@@ -62,4 +62,12 @@ public class UserServiceImpl implements UserService {
                 .flatMap(repository::findById)
                 .map(user -> user.getCurrentUsage() + usageToAdd > user.getMaxUsage());
     }
+
+    @Override
+    public Mono<User> findByUsername(String username) {
+        return Mono
+                .just(username)
+                .flatMap(repository::findByUserName)
+                .log();
+    }
 }

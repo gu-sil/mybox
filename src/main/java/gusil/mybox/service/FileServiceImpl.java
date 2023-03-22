@@ -84,7 +84,17 @@ public class FileServiceImpl implements FileService {
                         throw new FileNotFoundException(fileId);
                     }
                 })
-                .flatMap(repository::deleteById);
+                .flatMap(repository::deleteById)
+                .publishOn(Schedulers.boundedElastic())
+                .map(voidObj -> {
+                    try {
+                        Files.deleteIfExists(basePath.resolve(fileId));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return fileId;
+                })
+                .then();
     }
 
     private Mono<UploadFileResponse> createFileEntity(UploadFileRequest request) {

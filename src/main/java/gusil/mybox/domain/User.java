@@ -24,17 +24,19 @@ public class User implements UserDetails {
     private String userPassword;
     private Long maxUsage;
     private Long currentUsage;
+    private String rootDirectory;
 
     private Boolean enabled;
 
     private List<Role> roles;
 
     @Builder
-    public User(String userName, String userPassword, Long maxUsage, Long currentUsage) {
+    public User(String userName, String userPassword, Long maxUsage, Long currentUsage, String rootDirectory) {
         this.userName = userName;
         this.userPassword = userPassword;
         this.maxUsage = maxUsage;
         this.currentUsage = currentUsage;
+        this.rootDirectory = rootDirectory;
         this.enabled = true;
         this.roles = Collections.singletonList(Role.ROLE_USER);
     }

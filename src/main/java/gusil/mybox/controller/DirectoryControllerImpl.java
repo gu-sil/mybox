@@ -27,14 +27,6 @@ public class DirectoryControllerImpl implements DirectoryController {
     }
 
     @Override
-    @GetMapping("/root/items")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public Mono<ReadDirectoryItemListResponse> readRootDirectoryItemList(
-            @PathVariable String userId, Authentication auth) {
-        return directoryService.readRootDirectoryItemList("root", userId, auth.getName());
-    }
-
-    @Override
     @GetMapping("/{directoryId}/items")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(

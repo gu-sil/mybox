@@ -1,6 +1,7 @@
 package gusil.mybox.service;
 
 import gusil.mybox.domain.User;
+import gusil.mybox.dto.request.CreateDirectoryRequest;
 import gusil.mybox.dto.request.CreateUserRequest;
 import gusil.mybox.dto.response.CreateUserResponse;
 import gusil.mybox.dto.response.ReadUserResponse;
@@ -10,6 +11,7 @@ import gusil.mybox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -17,13 +19,30 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
+    private final DirectoryService directoryService;
     private final UserMapper mapper;
 
     @Override
+    @Transactional
     public Mono<CreateUserResponse> createUser(CreateUserRequest request) {
-        User newUser = mapper.mapToUser(request);
-        Mono<User> savedUser = repository.save(newUser);
-        return savedUser.map(mapper::mapToCreateUserResponse);
+        return Mono
+                .just(request)
+                .map(mapper::mapToUser)
+                .flatMap(user -> {
+                    CreateDirectoryRequest createDirectoryRequest =
+                            new CreateDirectoryRequest(user.getUserId(), "unassigned", "root");
+                    return directoryService.createRootDirectory(createDirectoryRequest);
+                })
+                .map(rootDirectory -> {
+                    User user = mapper.mapToUser(request);
+                    user.setRootDirectory(rootDirectory.getDirectoryId());
+                    return user;
+                })
+                .flatMap(repository::save)
+                .flatMap(savedUser -> directoryService
+                        .updateDirectoryOwner(savedUser.getRootDirectory(), savedUser.getUserId())
+                        .thenReturn(savedUser))
+                .map(mapper::mapToCreateUserResponse);
     }
 
     @Override

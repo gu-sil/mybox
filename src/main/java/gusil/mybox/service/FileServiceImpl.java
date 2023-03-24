@@ -1,5 +1,7 @@
 package gusil.mybox.service;
 
+import gusil.mybox.domain.File;
+import gusil.mybox.domain.User;
 import gusil.mybox.dto.request.UploadFileRequest;
 import gusil.mybox.dto.response.UploadFileResponse;
 import gusil.mybox.exception.FileNotFoundException;
@@ -7,6 +9,7 @@ import gusil.mybox.exception.NameDuplicatedException;
 import gusil.mybox.mapper.FileMapper;
 import gusil.mybox.repository.DirectoryRepository;
 import gusil.mybox.repository.FileRepository;
+import gusil.mybox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -24,6 +27,7 @@ public class FileServiceImpl implements FileService {
     private final FileMapper mapper;
     private final FileRepository repository;
     private final DirectoryRepository directoryRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final Path basePath = Paths.get("../mybox-files/");
 
@@ -95,6 +99,18 @@ public class FileServiceImpl implements FileService {
                     return fileId;
                 })
                 .then();
+    }
+
+    @Override
+    public Mono<Boolean> userOwnsFile(String username, String fileId) {
+        return Mono
+                .zip(userRepository.findByUserName(username), repository.findById(fileId))
+                .map(userAndFile -> {
+                    User user = userAndFile.getT1();
+                    File file = userAndFile.getT2();
+
+                    return file.getFileOwner().equals(user.getUserId());
+                });
     }
 
     private Mono<UploadFileResponse> createFileEntity(UploadFileRequest request) {

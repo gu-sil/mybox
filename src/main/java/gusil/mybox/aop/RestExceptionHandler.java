@@ -24,6 +24,12 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 
+    @ExceptionHandler(UnauthorizedUserException.class)
+    ResponseEntity handleUnauthorizedUserException(UnauthorizedUserException ex) {
+        log.debug("handling exception::" + ex);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
     @ExceptionHandler(DirectoryNotFoundException.class)
     ResponseEntity handleDirectoryNotFound(DirectoryNotFoundException ex) {
         log.debug("handling exception::" + ex);

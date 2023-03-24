@@ -7,8 +7,7 @@ import java.io.InputStream;
 
 public interface FileService {
     Mono<UploadFileResponse> uploadFile(UploadFileRequest request);
-
     Mono<InputStream> downloadFile(String directoryId, String fileId);
-
     Mono<Void> deleteFile(String fileId);
+    Mono<Boolean> userOwnsFile(String username, String file);
 }

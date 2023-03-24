@@ -3,6 +3,7 @@ package gusil.mybox.controller;
 import gusil.mybox.dto.request.UploadFileRequest;
 import gusil.mybox.dto.response.UploadFileResponse;
 import gusil.mybox.exception.DirectoryNotFoundException;
+import gusil.mybox.exception.UnauthorizedUserException;
 import gusil.mybox.exception.UserUsageExceedsException;
 import gusil.mybox.service.DirectoryService;
 import gusil.mybox.service.FileService;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -35,16 +37,23 @@ public class FileControllerImpl implements FileController {
             @RequestPart String fileName,
             @PathVariable("directoryId") String fileParent,
             @RequestPart Mono<FilePart> filePart,
-            @RequestHeader("Content-Length") Long fileSize) {
+            @RequestHeader("Content-Length") Long fileSize,
+            Authentication auth) {
 
         return filePart
-//                .flatMap(assertUserAuthority)
+                .flatMap(fp -> directoryService.userOwnsDirectory(auth.getName(), fileParent))
+                .map(userOwnsDirectory -> {
+                    if (userOwnsDirectory) {
+                        return filePart;
+                    } else {
+                        throw new UnauthorizedUserException(userId);
+                    }
+                })
                 .flatMap(fp -> directoryService.directoryExists(fileParent))
                 .map(directoryExists -> {
                     if (directoryExists) {
                         return filePart;
-                    }
-                    else {
+                    } else {
                         throw new DirectoryNotFoundException(fileParent);
                     }
                 })
@@ -52,8 +61,7 @@ public class FileControllerImpl implements FileController {
                 .map(usageExceeds -> {
                     if (usageExceeds) {
                         throw new UserUsageExceedsException(userId);
-                    }
-                    else {
+                    } else {
                         return filePart;
                     }
                 })
@@ -70,10 +78,20 @@ public class FileControllerImpl implements FileController {
     }
 
     @Override
-    @GetMapping("/directories/{directoryId}/files/{fileId}")
+    @GetMapping("directories/{directoryId}/files/{fileId}")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public Mono<ResponseEntity<InputStreamResource>> downloadFile(@PathVariable String directoryId, @PathVariable String fileId) {
-        return fileService.downloadFile(directoryId, fileId)
+    public Mono<ResponseEntity<InputStreamResource>> downloadFile(
+            @PathVariable String directoryId, @PathVariable String fileId, Authentication auth) {
+        return fileService.userOwnsFile(auth.getName(), fileId)
+                .map(userOwnsFile -> {
+                    if (userOwnsFile) {
+                        return fileId;
+                    } else {
+                        throw new UnauthorizedUserException(auth.getName());
+                    }
+                })
+                .then()
+                .flatMap(Void -> fileService.downloadFile(directoryId, fileId))
                 .map(inputStream -> ResponseEntity
                         .ok()
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -84,7 +102,16 @@ public class FileControllerImpl implements FileController {
     @Override
     @DeleteMapping("files/{fileId}")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public Mono<Void> deleteFile(@PathVariable String fileId) {
-        return fileService.deleteFile(fileId);
+    public Mono<Void> deleteFile(@PathVariable String fileId, Authentication auth) {
+        return fileService.userOwnsFile(auth.getName(), fileId)
+                .map(userOwnsFile -> {
+                    if (userOwnsFile) {
+                        return fileId;
+                    } else {
+                        throw new UnauthorizedUserException(auth.getName());
+                    }
+                })
+                .then()
+                .flatMap(Void -> fileService.deleteFile(fileId));
     }
 }

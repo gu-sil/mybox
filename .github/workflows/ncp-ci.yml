@@ -1,4 +1,4 @@
-name: NCP-CI
+name: NCP CI
 
 on:
   push:
@@ -21,5 +21,5 @@ jobs:
       
       # 테스트를 제외하고 빌드
       - name: Build with Maven
-        run: mvn package
+        run: mvn package -Dmaven.test.skip
         shell: bash

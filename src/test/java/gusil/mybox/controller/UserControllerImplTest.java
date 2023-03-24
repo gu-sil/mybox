@@ -13,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static gusil.mybox.MyboxTestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class UserControllerImplTest {
     @LocalServerPort

@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MyboxTestUtil {
-    public static final String TEST_USER1_ID = "6102c84c-39e1-4169-ad54-81cdef097f56";
-    public static final String TEST_USER1_NAME = "user-for-test-1";
-    public static final String TEST_USER1_JWT = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiJdLCJzdWIiOiJ1c2VyLWZvci10ZXN0LTEiLCJpYXQiOjE2Nzk1NTUxNTAsImV4cCI6MTY4MDE1OTk1MH0.3KdVktGTUdTPEivclLevLcbQErMc8obCgjYuZrOxcgYZh6huuSXFjFB52Rcp6vsVj0eN8TKvVIv0iCTOSkjP6A";
+    public static final String TEST_USER1_ID = "da54fffc-2afb-4dea-8899-a4ed6bf1ee84";
+    public static final String TEST_USER1_NAME = "user-for-unit-test-1";
+    public static final String TEST_USER1_JWT = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiJdLCJzdWIiOiJ1c2VyLWZvci11bml0LXRlc3QtMSIsImlhdCI6MTY3OTY3MjkxMywiZXhwIjoxNjgwMjc3NzEzfQ.0vVuqZCqAYpCJlPgPbTwyjXdSvWkkh40yoaAMLP0HwDEQTLfRABy6LqWKmulLt01qPc8ADozv1Euu4HDftvxjg";
 
-    public static final String TEST_USER2_ID = "b2de67c2-5937-4736-b5e1-2e7beaac9878";
-    public static final String TEST_USER2_NAME = "user-for-test-2";
-    public static final String TEST_USER2_JWT = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiJdLCJzdWIiOiJ1c2VyLWZvci10ZXN0LTIiLCJpYXQiOjE2Nzk1NTUyMDMsImV4cCI6MTY4MDE2MDAwM30.EysuQHJS8m5S95HSzq4theVUFoD_PTa7EO52oHP-RCtS6OajW8nUAoS8kZq0ZRchxh6FPhCdRM6_bc8ppvPv8w";
+    public static final String TEST_USER2_ID = "e9181f51-22c6-49d8-86d4-a38f8eb20465";
+    public static final String TEST_USER2_NAME = "user-for-unit-test-2";
+    public static final String TEST_USER2_JWT = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjpbIlJPTEVfVVNFUiJdLCJzdWIiOiJ1c2VyLWZvci11bml0LXRlc3QtMiIsImlhdCI6MTY3OTY3Mjk4MSwiZXhwIjoxNjgwMjc3NzgxfQ.Gqv7UwY2XDtaowXDEcX3NRr9p8480HOpW3_QvluLTPr8ZNGoncu1V9wUk1aFJOrf3ig5BYH9QLW64exI0rWnuQ";
 
     public static final String AUTH_HEADER_KEY = "Authorization";
 

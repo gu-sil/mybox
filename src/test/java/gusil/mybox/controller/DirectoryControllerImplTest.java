@@ -66,25 +66,6 @@ class DirectoryControllerImplTest {
     }
 
     @Test
-    void readRootDirectoryChildren_withExistIdAndValidUser_shouldGet200AndChildrenList() {
-        // given
-        String dirName = "test-dir-1";
-        String createdDirId = createDirectory(dirName, TEST_USER1_ID, "root", TEST_USER1_JWT)
-                .body()
-                .jsonPath()
-                .get("directoryId")
-                .toString();
-
-        // when
-        ExtractableResponse<Response> response = readDirectoryChildren("root", TEST_USER1_ID, TEST_USER1_JWT);
-
-        // then
-        assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
-
-        OwnerIdAndDirIdToDelete.add(new Tuple2<>(TEST_USER1_ID, createdDirId));
-    }
-
-    @Test
     void readDirectoryChildren_withExistIdAndValidUser_shouldGet200AndChildrenList() {
         // given
         String dirNameParent = "test-dir-1";

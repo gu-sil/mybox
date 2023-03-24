@@ -8,6 +8,7 @@ import lombok.Data;
 public class ReadUserResponse {
     private String userId;
     private String userName;
+    private String rootDirectory;
     private Long maxUsage;
     private Long currentUsage;
 }

@@ -22,14 +22,13 @@ public class DirectoryServiceImpl implements DirectoryService {
     private final DirectoryRepository repository;
     private final FileRepository fileRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
     private final DirectoryMapper mapper;
 
     @Override
     public Mono<CreateDirectoryResponse> createDirectory(CreateDirectoryRequest request) {
         return Mono
                 .just(request)
-                .flatMap(req -> userService.userExists(req.getDirectoryOwner()))
+                .flatMap(req -> userRepository.existsById(req.getDirectoryOwner()))
                 // Check directory owner id exists
                 .map(userExists -> {
                     if (!userExists) {
@@ -61,6 +60,15 @@ public class DirectoryServiceImpl implements DirectoryService {
                         return request;
                     }
                 })
+                .map(mapper::mapToDirectory)
+                .flatMap(repository::save)
+                .map(mapper::mapToCreateDirectoryResponse);
+    }
+
+    @Override
+    public Mono<CreateDirectoryResponse> createRootDirectory(CreateDirectoryRequest request) {
+        return Mono
+                .just(request)
                 .map(mapper::mapToDirectory)
                 .flatMap(repository::save)
                 .map(mapper::mapToCreateDirectoryResponse);
@@ -132,6 +140,19 @@ public class DirectoryServiceImpl implements DirectoryService {
                             fileList.forEach(file -> response.getItems().add(mapper.mapToReadDirectoryItemListResponseItem(file)));
                             return response;
                         }));
+    }
+
+    @Override
+    public Mono<Void> updateDirectoryOwner(String directoryId, String newOwnerId) {
+        return Mono
+                .just(directoryId)
+                .flatMap(repository::findById)
+                .map(directory -> {
+                    directory.setDirectoryOwner(newOwnerId);
+                    return directory;
+                })
+                .flatMap(repository::save)
+                .then();
     }
 
     @Override

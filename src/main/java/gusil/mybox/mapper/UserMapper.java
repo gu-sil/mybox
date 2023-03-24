@@ -23,7 +23,6 @@ public class UserMapper {
         return CreateUserResponse.builder()
                 .userId(user.getUserId())
                 .userName(user.getUsername())
-                .userPassword(user.getUserPassword())
                 .maxUsage(user.getMaxUsage())
                 .currentUsage(user.getCurrentUsage())
                 .build();
@@ -33,7 +32,6 @@ public class UserMapper {
         return ReadUserResponse.builder()
                 .userId(user.getUserId())
                 .userName(user.getUsername())
-                .userPassword(user.getUserPassword())
                 .maxUsage(user.getMaxUsage())
                 .currentUsage(user.getCurrentUsage())
                 .build();

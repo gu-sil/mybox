@@ -1,23 +1,27 @@
 package gusil.mybox.service;
 
+import gusil.mybox.domain.Directory;
+import gusil.mybox.domain.User;
 import gusil.mybox.dto.request.CreateDirectoryRequest;
 import gusil.mybox.dto.response.CreateDirectoryResponse;
 import gusil.mybox.dto.response.ReadDirectoryItemListResponse;
-import gusil.mybox.exception.DirectoryHasChildException;
-import gusil.mybox.exception.DirectoryNotFoundException;
-import gusil.mybox.exception.UserNotFoundException;
+import gusil.mybox.exception.*;
 import gusil.mybox.mapper.DirectoryMapper;
 import gusil.mybox.repository.DirectoryRepository;
 import gusil.mybox.repository.FileRepository;
+import gusil.mybox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DirectoryServiceImpl implements DirectoryService {
     private final DirectoryRepository repository;
     private final FileRepository fileRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final DirectoryMapper mapper;
 
@@ -43,21 +47,54 @@ public class DirectoryServiceImpl implements DirectoryService {
                         return request;
                     }
                 })
+                // Check directory name is duplicated
+                .flatMap(req ->
+                        repository.existsByDirectoryNameAndDirectoryParent(
+                                req.getDirectoryName(),
+                                req.getDirectoryParent()
+                        )
+                )
+                .map(isDuplicated -> {
+                    if (isDuplicated) {
+                        throw new NameDuplicatedException(request.getDirectoryName());
+                    } else {
+                        return request;
+                    }
+                })
                 .map(mapper::mapToDirectory)
                 .flatMap(repository::save)
                 .map(mapper::mapToCreateDirectoryResponse);
     }
 
     @Override
-    public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(String directoryId) {
+    public Mono<ReadDirectoryItemListResponse> readDirectoryItemList(String directoryId, String userId, String userName) {
         return Mono
-                .just(directoryId)
+                .just(userId)
+                // Check user has userId
+                .flatMap(userRepository::findById)
+                .map(user -> {
+                    if (user.getUsername().equals(userName)) {
+                        return directoryId;
+                    } else {
+                        throw new UnauthorizedUserException(userId);
+                    }
+                })
+                // Check directory exists
                 .flatMap(repository::existsById)
                 .map(directoryExists -> {
                     if (directoryExists) {
-                        return new ReadDirectoryItemListResponse();
+                        return directoryId;
                     } else {
                         throw new DirectoryNotFoundException(directoryId);
+                    }
+                })
+                // Check user has authority
+                .flatMap(repository::findById)
+                .map(directory -> {
+                    if (directory.getDirectoryOwner().equals(userId)) {
+                        return new ReadDirectoryItemListResponse();
+                    } else {
+                        throw new UnauthorizedUserException(userId);
                     }
                 })
                 .flatMap(response -> repository.findAllByDirectoryParent(directoryId).collectList()
@@ -69,8 +106,32 @@ public class DirectoryServiceImpl implements DirectoryService {
                         .map(fileList -> {
                             fileList.forEach(file -> response.getItems().add(mapper.mapToReadDirectoryItemListResponseItem(file)));
                             return response;
+                        }));
+    }
+
+    @Override
+    public Mono<ReadDirectoryItemListResponse> readRootDirectoryItemList(String directoryId, String userId, String userName) {
+        return Mono
+                .just(userId)
+                // Check user has userId
+                .flatMap(userRepository::findById)
+                .map(user -> {
+                    if (user.getUsername().equals(userName)) {
+                        return new ReadDirectoryItemListResponse();
+                    } else {
+                        throw new UnauthorizedUserException(userId);
+                    }
+                })
+                .flatMap(response -> repository.findAllByDirectoryParentAndDirectoryOwner(directoryId, userId).collectList()
+                        .map(directoryList -> {
+                            directoryList.forEach(directory -> response.getItems().add(mapper.mapToReadDirectoryItemListResponseItem(directory)));
+                            return response;
                         }))
-                ;
+                .flatMap(response -> fileRepository.findAllByFileParentAndFileOwner(directoryId, userId).collectList()
+                        .map(fileList -> {
+                            fileList.forEach(file -> response.getItems().add(mapper.mapToReadDirectoryItemListResponseItem(file)));
+                            return response;
+                        }));
     }
 
     @Override
@@ -81,8 +142,7 @@ public class DirectoryServiceImpl implements DirectoryService {
                 .map(directoryExists -> {
                     if (directoryExists) {
                         return directoryId;
-                    }
-                    else {
+                    } else {
                         throw new DirectoryNotFoundException(directoryId);
                     }
                 })
@@ -90,8 +150,7 @@ public class DirectoryServiceImpl implements DirectoryService {
                 .map(fileExist -> {
                     if (fileExist) {
                         throw new DirectoryHasChildException(directoryId);
-                    }
-                    else {
+                    } else {
                         return directoryId;
                     }
                 })
@@ -99,8 +158,7 @@ public class DirectoryServiceImpl implements DirectoryService {
                 .map(directoryExists -> {
                     if (directoryExists) {
                         throw new DirectoryHasChildException(directoryId);
-                    }
-                    else {
+                    } else {
                         return directoryId;
                     }
                 })
@@ -112,5 +170,17 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public Mono<Boolean> directoryExists(String directoryId) {
         return repository.existsById(directoryId);
+    }
+
+    @Override
+    public Mono<Boolean> userOwnsDirectory(String username, String directoryId) {
+        return Mono
+                .zip(userRepository.findByUserName(username), repository.findById(directoryId))
+                .map(userAndDirectory -> {
+                    User user = userAndDirectory.getT1();
+                    Directory directory = userAndDirectory.getT2();
+
+                    return directory.getDirectoryOwner().equals(user.getUserId());
+                });
     }
 }

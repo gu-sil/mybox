@@ -12,6 +12,7 @@ import gusil.mybox.repository.FileRepository;
 import gusil.mybox.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -32,6 +33,7 @@ public class FileServiceImpl implements FileService {
     private final Path basePath = Paths.get("../mybox-files/");
 
     @Override
+    @Transactional
     public Mono<UploadFileResponse> uploadFile(UploadFileRequest request) {
         return Mono
                 .zip(createFileEntity(request), request.getFilePart())
@@ -44,11 +46,7 @@ public class FileServiceImpl implements FileService {
                         fileAndFilePart
                                 .getT2()
                                 .transferTo(basePath.resolve(fileAndFilePart.getT1().getFileId()))
-                                .thenReturn(fileAndFilePart.getT1()))
-                .publishOn(Schedulers.boundedElastic())
-                .doOnError(ex -> userService
-                        .addUserCurrentUsage(request.getUserId(), request.getFileSize() * -1)
-                        .block());
+                                .thenReturn(fileAndFilePart.getT1()));
     }
 
     @Override

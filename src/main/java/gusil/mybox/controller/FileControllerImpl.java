@@ -65,8 +65,6 @@ public class FileControllerImpl implements FileController {
                         return filePart;
                     }
                 })
-                .flatMap(fp -> userService.addUserCurrentUsage(userId, fileSize * -1)
-                        .thenReturn(filePart))
                 .map(fp -> UploadFileRequest.builder()
                         .userId(userId)
                         .fileName(fileName)
